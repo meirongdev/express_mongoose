@@ -3,6 +3,9 @@ import {
   listPostsByAuthor,
   listPostsByTag,
   getPostById,
+  createPost,
+  updatePost,
+  deletePost,
 } from '../service/posts.js'
 
 export function postsRoutes(app) {
@@ -37,6 +40,43 @@ export function postsRoutes(app) {
         return res.status(404).end()
       }
       return res.json(post)
+    } catch (err) {
+      return res.status(500).end()
+    }
+  })
+
+  app.post('/api/v1/posts', async (req, res) => {
+    const { author, title, content, tags } = req.body
+    try {
+      const post = await createPost(author, title, content, tags)
+      return res.status(201).json(post)
+    } catch (err) {
+      return res.status(500).end()
+    }
+  })
+
+  app.patch('/api/v1/posts/:id', async (req, res) => {
+    const { id } = req.params
+    const { author, title, content, tags } = req.body
+    try {
+      const post = await updatePost(id, author, title, content, tags)
+      if (!post) {
+        return res.status(404).end()
+      }
+      return res.json(post)
+    } catch (err) {
+      return res.status(500).end()
+    }
+  })
+
+  app.delete('/api/v1/posts/:id', async (req, res) => {
+    const { id } = req.params
+    try {
+      const post = await deletePost(id)
+      if (!post) {
+        return res.status(404).end()
+      }
+      return res.status(204).end()
     } catch (err) {
       return res.status(500).end()
     }
