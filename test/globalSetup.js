@@ -1,11 +1,8 @@
 import { MongoMemoryServer } from 'mongodb-memory-server'
 
 export default async function globalSetup() {
-  const mongoServer = new MongoMemoryServer({
-    binary: {
-      version: '7.6.0',
-    },
-  })
+  const mongoServer = await MongoMemoryServer.create()
   global.__MONGOINSTANCE = mongoServer
-  process.env.DB_URL = await mongoServer.getUri()
+  process.env.DB_URI = await mongoServer.getUri()
+  // process.env.DB_USER = await mongoServer.auth('test', 'test')
 }
