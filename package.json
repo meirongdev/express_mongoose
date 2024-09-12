@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "node app.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "lint": "eslint src",
     "prepare": "husky init"
