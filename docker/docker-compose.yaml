@@ -9,7 +9,4 @@ services:
     ports:
       - "27017:27017" # Expose port 27017
     volumes:
-      - mongo-data:/data/db # Volume for data persistence
-volumes:
-  mongo-data:
-    driver: local # Use local driver for volume
+      - ./tmp/db:/data/db # Volume for data persistence

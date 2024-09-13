@@ -1,3 +1,4 @@
+import { requireAuth } from '../middleware/jwt.js'
 import {
   listAllPosts,
   listPostsByAuthor,
@@ -48,20 +49,29 @@ export function postsRoutes(app) {
   })
 
   // Add the following route handlers
-  // curl -X POST http://localhost:3000/api/v1/posts -H 'Content-Type: application/json' -d '{"author":"author1","title":"title1","content":"content1","tags":["tag1","tag2"]}'
-  app.post('/api/v1/posts', async (req, res) => {
+  app.post('/api/v1/posts', requireAuth, async (req, res) => {
     try {
-      const post = await createPost(req.body)
+      const userId = req.auth?.sub
+      if (!userId) {
+        return res.status(401).end()
+      }
+      const post = await createPost(userId, req.body)
       return res.status(201).json(post)
     } catch (err) {
       return res.status(500).end()
     }
   })
 
-  // curl -X PATCH http://localhost:3000/api/v1/posts/66e305335a70ae4e273d7fdd -H 'Content-Type: application/json' -d '{"author":"author1","title":"title1","content":"content1","tags":["tag1","tag2"]}'
-  app.patch('/api/v1/posts/:id', async (req, res) => {
+  app.patch('/api/v1/posts/:id', requireAuth, async (req, res) => {
     const { id } = req.params
     try {
+      const userId = req.auth?.sub
+      if (!userId) {
+        return res.status(401).end()
+      }
+      if (req.body.author !== userId) {
+        return res.status(403).end()
+      }
       const post = await updatePost(id, req.body)
       if (!post) {
         return res.status(404).end()
@@ -73,9 +83,16 @@ export function postsRoutes(app) {
   })
 
   // curl -X DELETE http://localhost:3000/api/v1/posts/66e305335a70ae4e273d7fdd
-  app.delete('/api/v1/posts/:id', async (req, res) => {
+  app.delete('/api/v1/posts/:id', requireAuth, async (req, res) => {
     const { id } = req.params
     try {
+      const userId = req.auth?.sub
+      if (!userId) {
+        return res.status(401).end()
+      }
+      if (req.body.author !== userId) {
+        return res.status(403).end()
+      }
       const post = await deletePost(id)
       if (!post) {
         return res.status(404).end()

@@ -16,9 +16,8 @@ import { User } from '../db/models/user.js'
 describe('creating posts', () => {
   test('with all parameters should succeed', async () => {
     console.log(createdUser)
-    const created = await createPost({
+    const created = await createPost(createdUser._id, {
       title: 'Hello, world!',
-      author: createdUser,
       content: 'This is a test post.',
       tags: ['test'],
     })
@@ -37,12 +36,11 @@ describe('creating posts', () => {
 
   test('without title should fail', async () => {
     const post = {
-      author: 'admin',
       content: 'This is a test post.',
       tags: ['test'],
     }
     try {
-      await createPost(post)
+      await createPost(createdUser._id, post)
     } catch (error) {
       expect(error).toBeInstanceOf(mongoose.Error.ValidationError)
       expect(error.message).toContain('Path `title` is required')
