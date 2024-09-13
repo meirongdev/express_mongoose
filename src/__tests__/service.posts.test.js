@@ -11,12 +11,14 @@ import {
   deletePost,
 } from '../service/posts.js'
 import { Post } from '../db/models/post.js'
+import { User } from '../db/models/user.js'
 
 describe('creating posts', () => {
   test('with all parameters should succeed', async () => {
+    console.log(createdUser)
     const created = await createPost({
       title: 'Hello, world!',
-      author: 'admin',
+      author: createdUser,
       content: 'This is a test post.',
       tags: ['test'],
     })
@@ -48,26 +50,36 @@ describe('creating posts', () => {
   })
 })
 
+const sampleUser = {
+  username: 'admin',
+  password: 'pass',
+}
+
 const samplePosts = [
   {
     title: 'Hello, Express!',
-    author: 'admin',
+    // author: 'admin',
     content: 'This is a test post.',
     tags: ['express', 'test'],
   },
   {
     title: 'Hello, Mongoose!',
-    author: 'Alice',
+    // author: 'Alice',
     tags: ['mongoose', 'test'],
   },
 ]
 
 let createdSamplePosts = []
-
+let createdUser = {}
 beforeEach(async () => {
+  await User.deleteMany({})
+  const u = new User(sampleUser)
+  await u.save()
+  createdUser = u
   await Post.deleteMany({})
   createdSamplePosts = []
   for (const post of samplePosts) {
+    post['author'] = u._id
     const p = new Post(post)
     createdSamplePosts.push(await p.save())
   }
@@ -90,9 +102,9 @@ describe('listing posts', () => {
   })
 
   test('should return posts by author', async () => {
-    const posts = await listPostsByAuthor('Alice')
-    expect(posts).toHaveLength(1)
-    expect(posts[0].author).toBe('Alice')
+    const posts = await listPostsByAuthor('admin')
+    expect(posts).toHaveLength(2)
+    expect(posts[0].author).toEqual(createdUser._id)
   })
 
   test('should return posts by tag', async () => {

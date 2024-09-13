@@ -1,4 +1,5 @@
 import { Post } from '../db/models/post.js'
+import { User } from '../db/models/user.js'
 
 export async function createPost({ title, author, content, tags }) {
   const post = new Post({ title, author, content, tags })
@@ -16,8 +17,10 @@ export async function listAllPosts(options) {
   return await listPosts({}, options)
 }
 
-export async function listPostsByAuthor(author, options) {
-  return await listPosts({ author }, options)
+export async function listPostsByAuthor(authorUsername, options) {
+  const user = await User.findOne({ username: authorUsername })
+  if (!user) return []
+  return await listPosts({ author: user._id }, options)
 }
 
 export async function listPostsByTag(tags, options) {
@@ -29,9 +32,10 @@ export async function getPostById(postId) {
 }
 
 export async function updatePost(postId, { title, author, content, tags }) {
+  // TODO check the author
   return await Post.findOneAndUpdate(
     { _id: postId },
-    { $set: { title, author, content, tags } },
+    { $set: { title, content, tags } },
     { new: true },
   )
 }
